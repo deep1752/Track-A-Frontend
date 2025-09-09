@@ -5,16 +5,22 @@ import { getProfile } from '../../lib/api';
 import ProfileCard from '../components/ProfileCard';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+import LoadingSpinner from '../components/LoadingSpinner'; // Import the newly created LoadingSpinner component
 
 export default function ProfilePage() {
     const [profile, setProfile] = useState(null);
+    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
     useEffect(() => {
         (async () => {
+            setIsLoadingProfile(true);
             try {
                 const p = await getProfile();
                 setProfile(p);
             } catch (err) {
                 Swal.fire({ icon: 'error', title: 'Failed to load profile', text: err.message || 'Check your API' });
+            } finally {
+                setIsLoadingProfile(false);
             }
         })();
     }, []);
@@ -23,7 +29,9 @@ export default function ProfilePage() {
             <ProfileCard profile={profile} />
             <div className="card mt-8">
                 {/* Projects */}
-                {profile?.projects?.length > 0 ? (
+                {isLoadingProfile ? (
+                    <LoadingSpinner />
+                ) : profile?.projects?.length > 0 ? (
                     <>
                         <h3 style={{ marginTop: 0, marginBottom: 8 }}>Projects</h3>
                         <div style={{ display: 'grid', gap: 12 }}>
